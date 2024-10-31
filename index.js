@@ -1,6 +1,8 @@
 // server.js
 const express = require('express');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const jwt = require('jsonwebtoken');
+
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
 
@@ -8,7 +10,10 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // Allow only requests from your frontend
+  credentials: true // Allow cookies and authorization headers
+}));
 app.use(express.json()); // for parsing application/json
 
 // MongoDB connection
@@ -31,6 +36,39 @@ async function run() {
     const allfoodsDB = client.db('Bite-Bazar').collection('Allfoods');
     const topFoods = client.db('Bite-Bazar').collection('topfods');
 
+      //middleware 
+
+      app.post('/jwt' , async(req , res )=>{
+        const user = req.body;
+        // console.log('user',user)
+        const token = jwt.sign(user , process.env.ACCESS_TOKEN_SECRET ,{
+          expiresIn:'1h'})
+  
+        res.send({token})
+      })
+
+
+
+
+        const verifyToken = (req , res , next )=>{
+          // console.log('token verify ' , req.headers.authorization)
+
+          if(!req.headers.authorization){
+            return res.status(401).send({mess : 'forbidden'})
+          }
+          const token =req.headers.authorization.split(' ')[1];
+           
+          jwt.verify(token ,process.env.ACCESS_TOKEN_SECRET  , (err , decode )=>{
+            if(err){
+            return res.status(401).send({mess : 'forbidden'})
+
+            }
+
+            req.decode = decode;
+            next()
+          } )
+
+        }
 
     //all fooods 
     app.get('/allfoods', async (req, res) => {
@@ -44,8 +82,39 @@ async function run() {
     
           const result = await topFoods.find().toArray();
           res.send(result);
+          
        
       });
+
+
+      //ADD FOOD 
+      app.post('/addfoods' , verifyToken, async(req , res)=>{
+
+        const item = req.body;
+        const result = await allfoodsDB.insertOne(item);
+        res.send(result)
+
+      })
+
+      app.get('/myfoods/:email' ,verifyToken, async(req , res )=>{
+          const email = req.params.email;
+          const query = {'email' : email}
+          const result = await allfoodsDB.find(query).toArray();
+          console.log( result)
+
+          res.send(result)
+           
+      })
+
+      app.delete('/myfoods/:id',async (req , res)=>{
+        const id = req.params.id;
+        const query = {_id : new ObjectId(id)};
+        console.log(id)
+        const result =await allfoodsDB.deleteOne(query)
+        console.log( result)
+
+        res.send(result)
+      })
 
 
 
