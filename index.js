@@ -91,6 +91,7 @@ async function run() {
       app.post('/addfoods' , verifyToken, async(req , res)=>{
 
         const item = req.body;
+        console.log(item)
         const result = await allfoodsDB.insertOne(item);
         res.send(result)
 
@@ -116,6 +117,32 @@ async function run() {
         res.send(result)
       })
 
+
+      app.get('/food/:id' , async(req , res )=>{
+        const id = req.params.id ;
+        console.log(id)
+        const query ={_id : new ObjectId (id)};
+         const result = await allfoodsDB.findOne(query);
+         console.log(result)
+         res.send(result)
+      })
+
+        app.patch('/update/:id' , async(req , res)=>{
+          const id = new ObjectId(req.params.id)
+          console.log(id)
+          const query = {_id : id};
+          const data = req.body;
+          // console.log(data)
+
+          const updateDoc = {
+            $set:{ 
+                ...data
+            }
+          }
+            const result = await allfoodsDB.updateOne(query , updateDoc);
+            console.log(result);
+            res.send(result)
+        })
 
 
 
