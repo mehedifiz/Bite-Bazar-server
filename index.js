@@ -175,14 +175,14 @@ app.get("/allfoods", async (req, res) => {
     });
 
     //Purchase
-    app.post('/purchase' , async(req , res)=>{
+    app.post('/purchase' , verifyToken, async(req , res)=>{
       const data = req.body;
       const result = await PurchaseDB.insertOne(data);
       res.send(result)
 
     });
 
-  app.get('/purchase/:email' , async(req , res )=>{
+  app.get('/purchase/:email',verifyToken , async(req , res )=>{
     const email = req.params.email;
   const query = {email : email}
     const result = await PurchaseDB.find(query).toArray()
