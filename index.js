@@ -35,6 +35,7 @@ async function run() {
     const allfoodsDB = client.db("Bite-Bazar").collection("Allfoods");
     const topFoods = client.db("Bite-Bazar").collection("topfods");
     const PurchaseDB = client.db("Bite-Bazar").collection("Purchase");
+    const gallaryDb = client.db("Bite-Bazar").collection("gallary");
 
     //middleware
 
@@ -66,11 +67,51 @@ async function run() {
       });
     };
 
-    //all fooods
-    app.get("/allfoods", async (req, res) => {
-      const result = await allfoodsDB.find().toArray();
-      res.send(result);
-    });
+  // All foods endpoint with pagination and total count
+app.get("/allfoods", async (req, res) => {
+  console.log(req.query);
+
+  const page = parseInt(req.query.page) 
+  const size = parseInt(req.query.size) 
+  const total = await allfoodsDB.estimatedDocumentCount();
+
+   
+  const result = await allfoodsDB.find()
+      .skip(page * size)  
+      .limit(size)      
+      .toArray();
+
+ 
+  res.send({ foods: result, total });  
+});
+
+    // gallary 
+
+    app.get('/gallery' , async(req , res )=>{
+      const page = parseInt(req.query.page);
+      const limit = parseInt(req.query.limit);
+
+      const skip = (page - 1) * limit;
+
+      const result = await gallaryDb.find().skip(skip
+
+      ).limit(limit).toArray();
+      res.send(result)
+    })
+
+
+    app.post('/gallery' , async(req ,res )=>{
+      const data = req.body;
+      console.log(data);
+      const result = await gallaryDb.insertOne(data);
+      console.log(result)
+      res.send(result)
+    })
+
+
+
+
+
     //top fooods
     app.get("/topfoods", async (req, res) => {
       const result = await topFoods.find().toArray();
