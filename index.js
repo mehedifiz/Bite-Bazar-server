@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
-require("dotenv").config();
+require("dotenv").config(); 
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -192,7 +192,7 @@ app.get("/allfoods", async (req, res) => {
   });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
@@ -207,7 +207,7 @@ app.get("/", (req, res) => {
 });
 
 // Connect to MongoDB and then start the server
-// run().catch(console.dir);
+run().catch(console.dir);
 
 app.get("/", (req, res) => {
   res.send("   server is running");
