@@ -10,16 +10,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-const uri = "mongodb://localhost:27017";
+const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.ensactw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -30,7 +25,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const allfoodsDB = client.db("Bite-Bazar").collection("Allfoods");
     const topFoods = client.db("Bite-Bazar").collection("topfods");
@@ -212,7 +207,7 @@ app.get("/", (req, res) => {
 });
 
 // Connect to MongoDB and then start the server
-run().catch(console.dir);
+// run().catch(console.dir);
 
 app.get("/", (req, res) => {
   res.send("   server is running");
