@@ -45,26 +45,31 @@ async function run() {
 
      
 
-  // All foods endpoint with pagination and total count
-app.get("/allfoods", async (req, res) => {
-  console.log(req.query);
-  const search = req.query.search
-  const page = parseInt(req.query.page) 
-  const size = parseInt(req.query.size) 
-  const total = await allfoodsDB.estimatedDocumentCount();
-  const query ={
-     name : {$regex: search }
+  // All foods  
+  app.get("/allfoods", async (req, res) => {
+    console.log(req.query);
     
-    }
-   
-  const result = await allfoodsDB.find(query)
-      .skip(page * size)  
-      .limit(size)      
-      .toArray();
-
- 
-  res.send({ foods: result, total });  
-});
+    
+    const { search = '', page = 0, size = 10 } = req.query; 
+    const parsedPage = parseInt(page);
+    const parsedSize = parseInt(size);
+  
+     
+    const query = {
+      name: { $regex: search, $options: 'i' } 
+    };
+  
+    const total = await allfoodsDB.estimatedDocumentCount();
+    
+    // results
+    const result = await allfoodsDB.find(query)
+        .skip(parsedPage * parsedSize)
+        .limit(parsedSize)
+        .toArray();
+  
+    res.send({ foods: result, total });
+  });
+  
 
     // gallary 
 
