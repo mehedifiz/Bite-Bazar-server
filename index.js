@@ -1,6 +1,5 @@
 // server.js
 const express = require("express");
-const jwt = require("jsonwebtoken");
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const cors = require("cors");
@@ -42,33 +41,9 @@ async function run() {
 
     //middleware
 
-    app.post("/jwt", async (req, res) => {
-      const user = req.body;
-      // console.log('user',user)
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-        expiresIn: "1h",
-      });
+  
 
-      res.send({ token });
-    });
-
-    const verifyToken = (req, res, next) => {
-      // console.log('token verify ' , req.headers.authorization)
-
-      if (!req.headers.authorization) {
-        return res.status(401).send({ mess: "forbidden" });
-      }
-      const token = req.headers.authorization.split(" ")[1];
-
-      jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decode) => {
-        if (err) {
-          return res.status(401).send({ mess: "forbidden" });
-        }
-
-        req.decode = decode;
-        next();
-      });
-    };
+     
 
   // All foods endpoint with pagination and total count
 app.get("/allfoods", async (req, res) => {
@@ -96,9 +71,8 @@ app.get("/allfoods", async (req, res) => {
 
       const skip = (page - 1) * limit;
 
-      const result = await gallaryDb.find().skip(skip
-
-      ).limit(limit).toArray();
+      const result = await gallaryDb.find().skip(skip).limit(limit).toArray();
+      console.log(result)
       res.send(result)
     })
 
@@ -122,14 +96,14 @@ app.get("/allfoods", async (req, res) => {
     });
 
     //ADD FOOD
-    app.post("/addfoods", verifyToken, async (req, res) => {
+    app.post("/addfoods", async (req, res) => {
       const item = req.body;
       console.log(item);
       const result = await allfoodsDB.insertOne(item);
       res.send(result);
     });
 
-    app.get("/myfoods/:email", verifyToken, async (req, res) => {
+    app.get("/myfoods/:email", async (req, res) => {
       const email = req.params.email;
       const query = { email: email };
       const result = await allfoodsDB.find(query).toArray();
@@ -157,7 +131,7 @@ app.get("/allfoods", async (req, res) => {
       res.send(result);
     });
 
-    app.patch("/update/:id", verifyToken, async (req, res) => {
+    app.patch("/update/:id", async (req, res) => {
       const id = new ObjectId(req.params.id);
       console.log(id);
       const query = { _id: id };
@@ -175,15 +149,16 @@ app.get("/allfoods", async (req, res) => {
     });
 
     //Purchase
-    app.post('/purchase' , verifyToken, async(req , res)=>{
+    app.post('/purchase' , async(req , res)=>{
       const data = req.body;
       const result = await PurchaseDB.insertOne(data);
       res.send(result)
 
     });
 
-  app.get('/purchase/:email',verifyToken , async(req , res )=>{
+  app.get('/purchase/:email' , async(req , res )=>{
     const email = req.params.email;
+    console.log(email)
   const query = {email : email}
     const result = await PurchaseDB.find(query).toArray()
     res.send(result)
