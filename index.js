@@ -48,13 +48,16 @@ async function run() {
   // All foods endpoint with pagination and total count
 app.get("/allfoods", async (req, res) => {
   console.log(req.query);
-
+  const search = req.query.search
   const page = parseInt(req.query.page) 
   const size = parseInt(req.query.size) 
   const total = await allfoodsDB.estimatedDocumentCount();
-
+  const query ={
+     name : {$regex: search }
+    
+    }
    
-  const result = await allfoodsDB.find()
+  const result = await allfoodsDB.find(query)
       .skip(page * size)  
       .limit(size)      
       .toArray();
@@ -161,13 +164,15 @@ app.get("/allfoods", async (req, res) => {
     console.log(email)
   const query = {email : email}
     const result = await PurchaseDB.find(query).toArray()
+    // console.log(result);
+
     res.send(result)
   })
 
   app.delete("/purchase/:id", async (req, res) => {
     const id = req.params.id;
     const query = { _id: new ObjectId(id) };
-    console.log(id);
+    // console.log(id);
     const result = await PurchaseDB.deleteOne(query);
     console.log(result);
 
